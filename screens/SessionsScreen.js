@@ -11,11 +11,11 @@ import { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 
 // TODO 1: Uncomment the import below
-// import * as SQLite from 'expo-sqlite';
+import * as SQLite from 'expo-sqlite';
 
 // TODO 2: Create database using SQLite.openDatabaseSync('studybuddy.db')
 // and save it in a constant named 'db'
-
+const db = SQLite.openDatabaseSync('studybuddy.db');
 export default function SessionsScreen() {
   const [subject, setSuject]    = useState('');
   const [duration, setDuration] = useState('');
@@ -36,6 +36,18 @@ export default function SessionsScreen() {
     //
     // After creating the table, call loadSessions().
     // ───────────────────────────────────────────────────────────────────────
+    try {
+      db.execSync(`
+        CREATE TABLE IF NOT EXISTS sessions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          subject TEXT NOT NULL,
+          duration TEXT NOT NULL
+        );
+      `);
+      loadSessions();
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   const loadSessions = () => {
@@ -44,6 +56,12 @@ export default function SessionsScreen() {
     // Use db.getAllSync() with a SELECT * FROM sessions statement.
     // Update the sessions state with the returned array.
     // ───────────────────────────────────────────────────────────────────────
+    try {
+     const rows = db.getAllSync('SELECT * FROM sessions');
+     setSessions(rows);
+    } catch(err) {
+      console.error(err); 
+    }
   };
 
   const handleAdd = () => {
@@ -55,6 +73,13 @@ export default function SessionsScreen() {
     // Pass subject and duration as parameterised values (use ? placeholders).
     // After inserting, clear both inputs and call loadSessions() to refresh the list.
     // ───────────────────────────────────────────────────────────────────────
+    try {
+      db.runSync('INSERT INTO sessions (subject, duration) VALUES (?, ?)',
+        [subject, duration]
+      );
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   return (

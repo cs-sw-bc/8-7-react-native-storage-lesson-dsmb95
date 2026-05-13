@@ -10,7 +10,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 // TODO 1: Import AsyncStorage
 // ─────────────────────────────────────────────────────────────────────────────
 // Uncomment and complete the line below:
-// import AsyncStorage from '...';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const NAME_KEY = 'student_name';
@@ -33,6 +33,20 @@ export default function ProfileScreen() {
     // If values exist, update savedName and savedGoal.
     // Remember: getItem returns null if the key doesn't exist.
     // ───────────────────────────────────────────────────────────────────────
+    
+    try {
+      const name = await AsyncStorage.getItem(NAME_KEY);
+      const goal = await AsyncStorage.getItem(GOAL_KEY);
+      
+      if (name !== null) {
+        setSavedName(name);
+      }
+      if (goal !== null) {
+        setSavedGoal(goal);
+      }     
+    } catch(err) {
+      console.error(err)
+    }
   };
 
   const handleSave = async () => {
@@ -41,6 +55,15 @@ export default function ProfileScreen() {
     // Use AsyncStorage.setItem() for both NAME_KEY and GOAL_KEY.
     // Then update savedName and savedGoal so the UI refreshes.
     // ───────────────────────────────────────────────────────────────────────
+
+    try {
+      const nameSave = await AsyncStorage.setItem(NAME_KEY, name);
+      const goalSave = await AsyncStorage.setItem(GOAL_KEY, goal);
+      setSavedName(nameSave);
+      setSavedGoal(goalSave);
+    } catch(err) {
+      console.error(err)
+    }
   };
 
   const handleClear = async () => {
@@ -49,6 +72,12 @@ export default function ProfileScreen() {
     // Use AsyncStorage.removeItem() on NAME_KEY and GOAL_KEY.
     // Then clear savedName and savedGoal from state.
     // ───────────────────────────────────────────────────────────────────────
+    try {
+      await AsyncStorage.removeItem(NAME_KEY);
+      await AsyncStorage.removeItem(GOAL_KEY);
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   return (

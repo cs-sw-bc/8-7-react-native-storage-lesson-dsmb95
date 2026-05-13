@@ -8,10 +8,11 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
+
 // TODO 1: Import SecureStore
 // ─────────────────────────────────────────────────────────────────────────────
 // SecureStore uses a namespace import. Uncomment and complete the line below:
-// import * as SecureStore from '...';
+import * as SecureStore from 'expo-secure-store';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PASSCODE_KEY = 'group_passcode';
@@ -32,6 +33,20 @@ export default function AccessScreen() {
     // If a value exists → set isUnlocked to true, update statusMsg.
     // If no value exists → set isUnlocked to false, update statusMsg.
     // ───────────────────────────────────────────────────────────────────────
+    
+    try {
+      let passcode = await SecureStore.getItemAsync(PASSCODE_KEY);
+      
+      if (passcode !== null) {
+        setIsUnlocked(true);
+        setStatusMsg('Passcode saved, Status: Unlocked.');
+      } else {
+        setIsUnlocked(false);
+        setStatusMsg('No passcode saved. Status: Locked');
+      }
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   const handleSave = async () => {
@@ -41,6 +56,14 @@ export default function AccessScreen() {
     // Use SecureStore.setItemAsync().
     // Then set isUnlocked to true, update statusMsg, and clear the input.
     // ───────────────────────────────────────────────────────────────────────
+    try {
+      await SecureStore.setItemAsync(PASSCODE_KEY, input);
+      setIsUnlocked(true);
+      setStatusMsg('Your passcode was securely saved.');
+      setInput('');
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   const handleClear = async () => {
@@ -49,6 +72,13 @@ export default function AccessScreen() {
     // Use SecureStore.deleteItemAsync().
     // Then set isUnlocked to false and update statusMsg.
     // ───────────────────────────────────────────────────────────────────────
+    try {
+      await SecureStore.deleteItemAsync(PASSCODE_KEY);
+      setIsUnlocked(false);
+      setStatusMsg('You have successfully deleted your passcode.')
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   return (
